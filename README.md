@@ -1,1 +1,1 @@
-# mars_computer_vision
+# Fall 2020 Computer Vision Group Project
