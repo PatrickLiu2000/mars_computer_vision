@@ -10,7 +10,7 @@ from scipy.spatial import distance
 path = os.getcwd()
 
 assetsdir = path + "/assets/"
-testmap= plt.imread(assetsdir+"thm_dir_N-30_060sample.png")
+testmap= plt.imread(assetsdir+"thm_dir_N-30_060 copy 2.png")
 def get_gradients(imggray: np.ndarray):
     Mx = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])
     My = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]])
@@ -21,8 +21,13 @@ def get_gradients(imggray: np.ndarray):
     gy = ndimage.correlate(img64, My, mode='constant', cval=0.0)
     return gx, gy
 def next_to_black(x, y, imggray):
-    if imggray[y][x+1] ==0 or imggray[y][x-1]==0 or imggray[y+1][x]==0 or imggray[y-1][x]==0:
-        print("true")
+    shape = imggray.shape
+    if x + 1 >= shape[1] or y+1 >= shape[0] or x-1 <0 or y-1<0:
+        return False #not quite rright but safe
+
+    if imggray[y][x+1] ==0 or imggray[y][x-1]==0 or imggray[y+1][x]==0 or imggray[y-1][x]==0 or imggray[y][x] == 0:
+
+        # print("true")
         return True
     else:
         return False
@@ -34,25 +39,28 @@ def detect_circles(img: np.ndarray, radius:int,use_gradients = True, denoise=Fal
     gray = rgb2gray(img)
 
     edges = canny(image=gray,sigma=sig)
-
+    edgesc = np.copy(edges)
     edgePixels = np.where(edges ==True)
-    # print("ED pix format", edgePixels)
-    edgeIndex = np.zeros((len(edgePixels[0]),2))
+    edgeList = []
 
 
-    for i in range(len(edgeIndex)):
-        edgeIndex[i] = [edgePixels[0][i], edgePixels[1][i]]
-    edgeIndex = edgeIndex.astype(np.uint32)
-    # for j in range(len(edgeIndex)):
-    #     print(edgeIndex[j][1], edgeIndex[j][0])
-    #     if next_to_black(edgeIndex[j][1], edgeIndex[j][0], gray):
-    #         edges[edgeIndex[j][0]][edgeIndex[j][1]] = 0
-    #         print("made it here")
-    #         edgeIndex = np.delete(edgeIndex, j) #remove edges caused by missing photos
 
-    plt.imshow(edges)
-    plt.show()
+    for i in range(len(edgePixels[0])):
+        edgeList.append((int(edgePixels[0][i]), int(edgePixels[1][i])))
+    j=0
+    while j < len(edgeList):
+        # print("Len el is ", len(edgeList))
+        # print("j is ", j)
+        if next_to_black(edgeList[j][1], edgeList[j][0], gray):
+            edgesc[edgeList[j][0]][edgeList[j][1]] = 0
+            edgeList.pop(j) #remove edges caused by missing photos
+        j= j+1
 
+    # fig, ax = plt.subplots(2)
+    # ax[0].imshow(edges)
+    # ax[1].imshow(edgesc)
+    # plt.show()
+    edges = edgesc
 
     H = np.zeros((img.shape[0], img.shape[1])) #the hough accumulator array
 
@@ -62,10 +70,10 @@ def detect_circles(img: np.ndarray, radius:int,use_gradients = True, denoise=Fal
 
     if use_gradients:
         gx, gy = get_gradients(imggray=gray)
-        for i in edgeIndex:
+        for i in edgeList:
             theta[i[0],i[1]] = np.arctan2(float(gy[i[0], i[1]]), float(gx[i[0], i[1]]))
 
-    for pixel in edgeIndex:
+    for pixel in edgeList:
         # print("On pixel ", pixel, " of ", len(edgeIndex))
         if use_gradients:
             thetas = [theta[pixel[0]][pixel[1]]]
@@ -125,5 +133,5 @@ def display(H, centers, img):
     # axs[0].set_title("Radius = 100")
 
 
-c, h = detect_circles(testmap, 60)
+c, h = detect_circles(testmap, 60, use_gradients=False)
 display(h, c, testmap)
