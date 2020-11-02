@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en"><head>  
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>Computer Vision Class Project Fall 2020, Georgia Tech CS 4476 Devi Parikh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+<!-- Le styles -->  
+  <link href="css/bootstrap.css" rel="stylesheet">
+<style>
+body {
+padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+}
+.vis {
+color: #3366CC;
+}
+.data {
+color: #FF9900;
+}
+</style>
+  
+<link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+
+<!-- HTML5 shim, for IE6-8 support of HTML5 elements --><!--[if lt IE 9]>
+<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+</head>
+
+<body>
+<div class="container">
+<div class="page-header">
+
+<!-- Title and Name --> 
+<h1>CS 4476 Group Project</h1> 
+<span style="font-size: 20px; line-height: 1.5em;"><strong>Members: Winter Galyon, Patrick Liu, Connor Reitz, Joey Crawford</strong></span><br>
+<span style="font-size: 18px; line-height: 1.5em;">Computer Vision Class Project, Fall 2020</span><br>
+<span style="font-size: 18px; line-height: 1.5em;"> Georgia Tech CS 4476, Intructor: Devi Parikh</span>
+<hr>
+
+<!-- Goal -->
+<h3>Problem Statement</h3>
+
+Our project aims to identify where an input satellite image was taken relative to a known comprehensive satellite image. The case we hope to apply this to is an elevation map of mars provided by Google Mars. The input to our algorithm is an image of the surface of Mars and the output would be the location of that image relative to the elevation map we use as a reference as well as the orientation and size of the image relative to the Google Mars map, which could be used to identify the elevation the image would have been taken at if from a satellite. 
+<br><br>
+
+<!-- Approach -->
+<h3>Approach</h3>
+<ul>
+  <li>Our approach will result in a confidence matrix of the possible locations for the center of the viewing window (the input image). This will be constructed using several approaches which will be weighted and combined into a single nxm matrix where n and m are the dimensions of the google mars source image. (we can orient the input image when we get to that by matching the average gradient direction of the input window and the Google Mars picture)</li>
+  <li>One approach we will conduct is to find the center of a large number of the craters in the source image (elevation map from Google Mars) and store these as a nxm matrix wherein the center of each crater will be recorded as defined by a run of the hough circle detector (using gradients to decrease noise) on a set number of known radii. This will result in a number (R) of nxm matrices, one for each radius we choose to edge detect with.This algorithm will then be run on the input image and another R matrices will be made with a number of centers. This will then be randomly overlaid with the source image and a Gradient Descent algorithm with Simulated Annealing will be run to gradually converge on a local minimum (ideally the true minimum) for the distance to predicted crater centers. This will be run many times to prevent the location of local minima rather than the true minimum. The equation we want to optimise is the sum of distances between each center in the input to the closest centers in the source image. We will begin by writing the algorithm with a known window size for the input and known orientation (the same as the Google Mars orientation).</li>
+
+  <li>We will also be implementing a version of Speeded-Up Robust Features (SURF) to map an image to a location on Mars. To break down my process, the algorithm will have three parts: interest point identification, local neighborhood description, and matching. Utilizing the integral image, the algorithm will filter and use a blob detector to detect interest points. Different scales are obtained by applying box filters of different sizes. Local orientation vectors are then calculated using Haar wavelet responses weighed by a Gaussian function to determine the dominant orientation. The descriptors from the image and Mars will be compared to determine matching pairs. </li>
+  <li> Another technique we can use to perform feature detection and matching is by using SIFT (scale invariant feature transform), which is robust to rotation and scale. Initially to actually extract the features, we use a space-scale blob detector to identify the local maxima in the image. We then create a vector based on these extracted features using SIFT and use a thresholding along with euclidean distance ratios to feature match. </li>
+  <li>One last technique we will experiment with (measuring accuracy and speed) is by using the BRIEF (binary robust independent elementary features) feature detection and matching method. This method matches keypoints between the test images and the original image by using binary feature vectors. The image will first be smoothed by a Gaussian kernel. Then, the algorithm will find keypoints in the image and create descriptors to encode a numerical “fingerprint” so we can tell each feature apart from another. This image will then take image patches around the keypoint pixels, convert them into binary feature vectors, and represent the objects for matching. </li>
+
+</ul>
+
+<br><br>
+<!-- Results -->
+<h3>Experiments and results</h3>
+Our experiment is to compare a set of images of different sizes and orientations from random locations on the Google Mars ‘visible’ map with the full image. Knowing where the image is on the map, determine how accurately the program was able to locate where the image was at using the error calculation on the x and y location of the predicted location as well as the size and orientation. We will begin by knowing how large the window size is and that the orientation is north south (the same as the google mars source image). Then as we succeed we will make the algorithm more robust by using different orientations and gradually decreasing the window size of input images to prove greater efficacy.
+
+For our success criteria, the program is expected to be slightly less accurate with smaller areas of the map, as there are less features that we can extract to define the image. Initially we will start off by demonstrating a brute-force approach, which will be very computationally expensive and take very long to run as a result. We will then contrast this brute-force approach with the other algorithms/optimizations that we found through our research and compare the computation time as well as accuracy to our other approaches that we present. To actually assess the runtime and accuracy, we plan on using the time library for Python. For computing accuracy, we plan on using several metrics such as SSD and RMSE to compare our approaches.
+
+<h3>Resources</h3>
+<ul>
+  <li> <a href= "https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.443.1732&rep=rep1&type=pdf River location
+  http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.9.9601&rep=rep1&type=pdf"> Finding water bodies with neural nets</a> </li>
+  <li> <a href="https://medium.com/descarteslabs-team/mapmaking-in-the-age-of-artificial-intelligence-da9e71be21d3">
+  Finding features in satellite images</a> </li>
+  <li> <a href="https://www.sciencedirect.com/science/article/pii/S2468232216300555">
+  Location using chamfer distance </a> </li>
+  <li> <a href="https://www.google.com/mars/">Mars elevation map </a> </li>
+  <li> <a href="https://link.springer.com/chapter/10.1007/11744023_32"> SURF: Speeded Up Robust Features </a> </li>
+  <li> <a href="https://towardsdatascience.com/sift-scale-invariant-feature-transform-c7233dc60f37"> SIFT </a> </li>
+  <li> <a href="https://docs.python.org/3/library/time.html">Python time documentation </a> </li>
+</ul>
+<br><br>
+  <hr>
+  <footer> 
+  <p>© Patrick Liu</p>
+  </footer>
+</div>
+</div>
+
+<br><br>
+
+</body></html>
