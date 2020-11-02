@@ -40,11 +40,14 @@ color: #FF9900;
 <hr>
 
 <!-- Goal -->
-<h3>Problem Statement</h3>
+<h3>Abstract</h3>
 
 Our project aims to identify where an input satellite image was taken relative to a known comprehensive satellite image. The case we hope to apply this to is an elevation map of mars provided by Google Mars. The input to our algorithm is an image of the surface of Mars and the output would be the location of that image relative to the elevation map we use as a reference as well as the orientation and size of the image relative to the Google Mars map, which could be used to identify the elevation the image would have been taken at if from a satellite. 
 <br><br>
-
+<h3>Introduction</h3>
+TODO
+<h3>Teaser Figure</h3>
+<img src="./images/teaser.jpeg" style="width:600px;height:500px;">
 <!-- Approach -->
 <h3>Approach</h3>
 <ul>
@@ -63,7 +66,24 @@ Our project aims to identify where an input satellite image was taken relative t
 Our experiment is to compare a set of images of different sizes and orientations from random locations on the Google Mars ‘visible’ map with the full image. Knowing where the image is on the map, determine how accurately the program was able to locate where the image was at using the error calculation on the x and y location of the predicted location as well as the size and orientation. We will begin by knowing how large the window size is and that the orientation is north south (the same as the google mars source image). Then as we succeed we will make the algorithm more robust by using different orientations and gradually decreasing the window size of input images to prove greater efficacy.
 
 For our success criteria, the program is expected to be slightly less accurate with smaller areas of the map, as there are less features that we can extract to define the image. Initially we will start off by demonstrating a brute-force approach, which will be very computationally expensive and take very long to run as a result. We will then contrast this brute-force approach with the other algorithms/optimizations that we found through our research and compare the computation time as well as accuracy to our other approaches that we present. To actually assess the runtime and accuracy, we plan on using the time library for Python. For computing accuracy, we plan on using several metrics such as SSD and RMSE to compare our approaches.
-
+<h4> Patrick's Approach </h4>
+To preprocess the data, the raw images are done in a cylindrical projection, making viewing the entire map difficult:
+<br><br>
+<img src="./images/projection.png" style="width:300px;height:300px;">
+<br><br>
+We first reproject the map, correcting for distortions:
+<br><br>
+<img src="./images/reproject.png" style="width:300px;height:300px;">
+<br><br>
+We then split up this reprojected image into tiles for ease of processing and crater detection. For example: 
+<br><br>
+<img src="./images/tiles.png" style="width:500px;height:250px;">
+<br><br>
+Now, I am using an object detector for each tile, specifically using a blob detector and will extract the SURF descriptors for each region, which I used an already existing implementation. I then use an estimator to determine whether or not the objects detected are craters, specifically using gradient boosted decision tree classifiers from sklearn. Currently I am still working on this, but here is a preliminary prediction: 
+<br><br>
+<img src="./images/predicted_craters.png" style="width:300px;height:300px;">
+<br><br>
+Next steps for my approach include using Keras's implementation of a single-shot multibox detector(SSD).
 <h3>Resources</h3>
 <ul>
   <li> <a href= "https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.443.1732&rep=rep1&type=pdf River location
@@ -76,6 +96,7 @@ For our success criteria, the program is expected to be slightly less accurate w
   <li> <a href="https://link.springer.com/chapter/10.1007/11744023_32"> SURF: Speeded Up Robust Features </a> </li>
   <li> <a href="https://towardsdatascience.com/sift-scale-invariant-feature-transform-c7233dc60f37"> SIFT </a> </li>
   <li> <a href="https://docs.python.org/3/library/time.html">Python time documentation </a> </li>
+  <li> <a href="https://www.sciencedirect.com/science/article/abs/pii/S0032063309000956">Automatic detection of sub-km craters in high resolution planetary images</a> </li>
 </ul>
 <br><br>
   <hr>
