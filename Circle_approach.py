@@ -10,7 +10,9 @@ from scipy.spatial import distance
 path = os.getcwd()
 
 assetsdir = path + "/assets/"
-testmap= plt.imread(assetsdir+"thm_dir_N-30_060 copy 2.png")
+mapname = "thm_dir_N-30_060 copy.png"
+testimg = assetsdir+mapname
+testmap= plt.imread(testimg)
 def get_gradients(imggray: np.ndarray):
     Mx = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])
     My = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]])
@@ -31,20 +33,27 @@ def next_to_black(x, y, imggray):
         return True
     else:
         return False
-
+# def get_canny(img, sig): #lets you save an edgefile temporarily so canny doesnt have to be run many times
+#     edgefile = "curredge.png"
+#     if not os.path.isfile(path + "/CannyEdges/" + edgefile):
+#         gray = rgb2gray(img)
+#         edges = canny(image=gray, sigma=sig)
+#         plt.imshow(edges)
+#         plt.savefig(path + "/CannyEdges/" + edgefile, dpi = 1200)
+#     else:
+#         edges = plt.imread(path + "/CannyEdges/" + edgefile)
+#     return edges
 def detect_circles(img: np.ndarray, radius:int,use_gradients = True, denoise=False, allow_overlap =False):
     sig = 3  #can be changed based on image, sigma for canny edge detector
     numcircles = 3 #Can be changed to reflect any number of circles
 
     gray = rgb2gray(img)
+    edges = canny(image=gray, sigma=sig)
 
-    edges = canny(image=gray,sigma=sig)
     edgesc = np.copy(edges)
     edgePixels = np.where(edges ==True)
     edgeList = []
-
-
-
+    # gray = rgb2gray(img)
     for i in range(len(edgePixels[0])):
         edgeList.append((int(edgePixels[0][i]), int(edgePixels[1][i])))
     j=0
@@ -98,17 +107,17 @@ def detect_circles(img: np.ndarray, radius:int,use_gradients = True, denoise=Fal
     Htemp = np.copy(H)
     for i in range(numcircles):
         max = np.amax(Htemp)
-        print("Max votes was ", max)
+        # print("Max votes was ", max)
         center = np.where(Htemp == max)
-        print("center is located ", center )
-        center = [center[1][0], center[0][0]]
-        centers.append((center, radius)) #centers holds location and radius
+        # print("center is located ", center )
+        center = [center[1][0], center[0][0], radius]
+        centers.append(center) #centers holds location and radius
         Htemp[center[1]][center[0]] = -1 #to let us find a different center
         if not allow_overlap:
             for row in range(len(Htemp)):
                 for col in range(len(Htemp[0])):
                     point = (col, row)
-                    if distance.euclidean(point, center) < (2*radius):
+                    if distance.euclidean(point, [center[0], center[1]]) < (2*radius):
                         Htemp[point[1]][point[0]] = -1
 
 
@@ -117,21 +126,54 @@ def detect_circles(img: np.ndarray, radius:int,use_gradients = True, denoise=Fal
 
 
 def display(H, centers, img):
-    print("displaying")
+    # print("displaying")
 
     fig, axs = plt.subplots(3)
     axs[1].imshow(H)
     for i in centers:
-        circ = Circle(i[0], i[1], color = 'red',fill=False)
+        circ = Circle((i[0], i[1]), i[2], color = 'red',fill=False)
         axs[0].add_artist(circ)
     axs[0].imshow(img)
     sig=3
     gray = rgb2gray(img)
     axs[2].imshow(canny(image=gray,sigma=sig))
+    # plt.show()
+    msg = "Radius = "+ str(centers[0][2])
+    axs[0].set_title(msg)
+    print("New Figure")
+    plt.figure() #should do multiple windows
+
+def main(): # run to find centers of an image and save them
+    for i in range(1,10):
+        rad = i*10
+        print("Finding circles radius ", rad)
+        c, h = detect_circles(testmap, rad, use_gradients=False)
+        np.save(path+"/CircleCenters/" + mapname + "_" + str(rad) + ".npy", c) #saves centers as the name of the source underscore the radius.npy
+        display(h, c, testmap)
     plt.show()
 
-    # axs[0].set_title("Radius = 100")
+# c, h = detect_circles(testmap, 60, use_gradients=False)
+# display(h, c, testmap)
 
+def chamfer_dist(X, Y):# X is points in map, Y is points in image to be searched for
+    dists = []
+    pts = [] # for recordkeeping
+    for point in Y:
+        mindist = np.Infinity
+        minpt = [0, 0]
+        for xpoint in X:
+            # print("Point ", point)
+            # print("XPoint ", xpoint)
+            d = distance.euclidean([point[0], point[1]], [xpoint[0], xpoint[1]])
+            if d < mindist:
+                minpt = [xpoint[0], xpoint[1]]
+                mindist =d
+        dists.append(mindist)
+        pts.append(minpt)
 
-c, h = detect_circles(testmap, 60, use_gradients=False)
-display(h, c, testmap)
+    cd = 0
+    for i in dists:
+        cd = cd + i
+    cd = float(cd)/len(dists)
+    return cd
+# main()

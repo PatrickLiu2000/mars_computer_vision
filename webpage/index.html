@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"><head>  
+<html lang="en"><head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta charset="utf-8">
   <title>Computer Vision Class Project Fall 2020, Georgia Tech CS 4476 Devi Parikh</title>
@@ -7,7 +7,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-<!-- Le styles -->  
+<!-- Le styles -->
   <link href="css/bootstrap.css" rel="stylesheet">
 <style>
 body {
@@ -20,7 +20,7 @@ color: #3366CC;
 color: #FF9900;
 }
 </style>
-  
+
 <link href="css/bootstrap-responsive.min.css" rel="stylesheet">
 
 <!-- HTML5 shim, for IE6-8 support of HTML5 elements --><!--[if lt IE 9]>
@@ -32,8 +32,8 @@ color: #FF9900;
 <div class="container">
 <div class="page-header">
 
-<!-- Title and Name --> 
-<h1>CS 4476 Group Project</h1> 
+<!-- Title and Name -->
+<h1>CS 4476 Group Project</h1>
 <span style="font-size: 20px; line-height: 1.5em;"><strong>Members: Winter Galyon, Patrick Liu, Connor Reitz, Joey Crawford</strong></span><br>
 <span style="font-size: 18px; line-height: 1.5em;">Computer Vision Class Project, Fall 2020</span><br>
 <span style="font-size: 18px; line-height: 1.5em;"> Georgia Tech CS 4476, Intructor: Devi Parikh</span>
@@ -42,7 +42,7 @@ color: #FF9900;
 <!-- Goal -->
 <h3>Abstract</h3>
 
-Our project aims to identify where an input satellite image was taken relative to a known comprehensive satellite image. The case we hope to apply this to is an elevation map of mars provided by Google Mars. The input to our algorithm is an image of the surface of Mars and the output would be the location of that image relative to the elevation map we use as a reference as well as the orientation and size of the image relative to the Google Mars map, which could be used to identify the elevation the image would have been taken at if from a satellite. 
+Our project aims to identify where an input satellite image was taken relative to a known comprehensive satellite image. The case we hope to apply this to is an elevation map of mars provided by Google Mars. The input to our algorithm is an image of the surface of Mars and the output would be the location of that image relative to the elevation map we use as a reference as well as the orientation and size of the image relative to the Google Mars map, which could be used to identify the elevation the image would have been taken at if from a satellite.
 <br><br>
 <h3>Introduction</h3>
 TODO
@@ -84,6 +84,55 @@ Now, I am using an object detector for each tile, specifically using a blob dete
 <img src="./images/predicted_craters.png" style="width:300px;height:300px;">
 <br><br>
 Next steps for my approach include using Keras's implementation of a single-shot multibox detector(SSD).
+<br><br>
+
+<h4> BRIEF Approach </h4>
+For the BRIEF approach, we used OpenCV to extract key points and descriptors from a plane image of Mars and a local region within the plane image. The key points were detected using STAR, and then we used OpenCV’s BriefDescriptorExtractor to get the descriptors from those key points. The find_and_match_brief method in BRIEF_approach.py uses brute force matching and takes in a number of matches to display in the results – showing all matches by default.
+
+For this mid-project update, the BRIEF method was applied to one image and one local region to test out the method itself. In the final update, the method will be applied to various images with different local regions to test for speed and accuracy. For now, we can see the results of our BRIEF matching method:
+(Images computed with all matches showing)
+
+<img src="images/brief/all_matches.png">
+<br>
+a)  Local region within a large photo and its detected key points
+
+<img src="images/brief/all_matches_matched.png">
+<br>
+b)  Local regions key points matched to regions in the plane (hard to see due to size of image)
+
+<img src="images/brief/all_matches_zoom.png">
+<br>
+c)  Zoomed in plane to local area to better see local matches
+<br>
+<br>
+<img src="images/brief/stats_update1.png">
+<br>
+<br>
+d)  Statistics for the BRIEF approach (not including displaying the images, just the calculations themselves for detection and matching)
+<br><br>
+Using a relatively small window size in comparison to the overall image, 10.27 seconds for computing all the key points and matching them seems to be relatively fast. However, the method so far seems to lack accuracy. Out of 133 matches, there are not many that match to the location of the window I selected in the plane image. I believe this can be explained by 2 factors: the window size and the composition of the Mars surface. BRIEF doesn’t seem to be detecting features close to the edge of the local region, which can be seen in figure A. Any window size smaller actually was unable to detect any features for the image, so it is failing around the edges. For future updates, we will experiment more with larger local regions to see if accuracy is increased in matching. Secondly, the surface of Mars in this image contains many similar features; it is composed mainly of circular craters spread out around the entire surface. This may be the reason that it is detecting many matches outside of the desired region and could be an early indicator that detecting circles with the Hough transform may end up being the most accurate method of detection. In the next update, we will explore with preprocessing images before using the BRIEF approach to see if accuracy is increased. We will also compare the outputs of BRIEF to ORB (Oriented FAST and Rotated BRIEF).
+<br><br>
+
+<img src="images/brief/20_matches_local.png">
+<br>
+e)  local area with 20 best matches showing
+<br>
+
+<img src="images/brief/20_matches_zoom.png">
+<br>
+f)  local area matches in plane
+<br><br>
+
+Reiterating what was said before, accuracy seems to be low for these early attempts at using the BRIEF approach. Using different window sizes and preprocessing, we hope to increase the accuracy of this method.
+
+<br><br>
+<h3> Conclusions and Future Work </h3>
+
+<h4> BRIEF Approach </h4>
+
+As aforementioned, much more experimentation will take place with the basic framework of the BRIEF approach up and working. Different images of the surface of Mars, different local region window sizes, and preprocessing will all be experimented at different levels to attain a most accurate matching of regions to overall surface images of Mars. We will also compute processing times for when changing these parameters to measure for speed as well.
+
+
 <h3>Resources</h3>
 <ul>
   <li> <a href= "https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.443.1732&rep=rep1&type=pdf River location
@@ -97,10 +146,12 @@ Next steps for my approach include using Keras's implementation of a single-shot
   <li> <a href="https://towardsdatascience.com/sift-scale-invariant-feature-transform-c7233dc60f37"> SIFT </a> </li>
   <li> <a href="https://docs.python.org/3/library/time.html">Python time documentation </a> </li>
   <li> <a href="https://www.sciencedirect.com/science/article/abs/pii/S0032063309000956">Automatic detection of sub-km craters in high resolution planetary images</a> </li>
+  <li> <a href="https://docs.opencv.org/master/dc/dc3/tutorial_py_matcher.html">Matching descriptors in OpenCV</a> </li>
+  <li> <a href="https://docs.opencv.org/master/dc/d7d/tutorial_py_brief.html">Implementing BRIEF in OpenCV </a> </li>
 </ul>
 <br><br>
   <hr>
-  <footer> 
+  <footer>
   <p>© Patrick Liu</p>
   </footer>
 </div>
