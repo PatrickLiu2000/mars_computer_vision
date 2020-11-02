@@ -69,19 +69,19 @@ For our success criteria, the program is expected to be slightly less accurate w
 <h4> Patrick's Approach </h4>
 To preprocess the data, the raw images are done in a cylindrical projection, making viewing the entire map difficult:
 <br><br>
-<img src="./images/projection.png" style="width:300px;height:300px;">
+<img src="./images/patrick/projection.png" style="width:300px;height:300px;">
 <br><br>
 We first reproject the map, correcting for distortions:
 <br><br>
-<img src="./images/reproject.png" style="width:300px;height:300px;">
+<img src="./images/patrick/reproject.png" style="width:300px;height:300px;">
 <br><br>
 We then split up this reprojected image into tiles for ease of processing and crater detection. For example: 
 <br><br>
-<img src="./images/tiles.png" style="width:500px;height:250px;">
+<img src="./images/patrick/tiles.png" style="width:500px;height:250px;">
 <br><br>
 Now, I am using an object detector for each tile, specifically using a blob detector and will extract the SURF descriptors for each region, which I used an already existing implementation. I then use an estimator to determine whether or not the objects detected are craters, specifically using gradient boosted decision tree classifiers from sklearn. Currently I am still working on this, but here is a preliminary prediction: 
 <br><br>
-<img src="./images/predicted_craters.png" style="width:300px;height:300px;">
+<img src="./images/patrick/predicted_craters.png" style="width:300px;height:300px;">
 <br><br>
 Next steps for my approach include using Keras's implementation of a single-shot multibox detector(SSD).
 <br><br>
@@ -132,6 +132,8 @@ Reiterating what was said before, accuracy seems to be low for these early attem
 
 As aforementioned, much more experimentation will take place with the basic framework of the BRIEF approach up and working. Different images of the surface of Mars, different local region window sizes, and preprocessing will all be experimented at different levels to attain a most accurate matching of regions to overall surface images of Mars. We will also compute processing times for when changing these parameters to measure for speed as well.
 
+<h4> Blob Detector + SSD Approach </h4>
+Given the predictions that the blob detector has made so far, the accuracies seem promising. Along with using an neural network, this will most likely yield the most accurate result out of all the approaches.
 
 <h3>Resources</h3>
 <ul>
