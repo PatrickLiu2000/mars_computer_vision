@@ -45,7 +45,9 @@ color: #FF9900;
 Our project aims to identify where an input satellite image was taken relative to a known comprehensive satellite image. The case we hope to apply this to is an elevation map of mars provided by Google Mars. The input to our algorithm is an image of the surface of Mars and the output would be the location of that image relative to the elevation map we use as a reference as well as the orientation and size of the image relative to the Google Mars map, which could be used to identify the elevation the image would have been taken at if from a satellite.
 <br><br>
 <h3>Introduction</h3>
-TODO
+The problem we are solving is narrowly defined as locating the place where an image was taken from a satellite image of mars. This is applicable to real life space missions where a satellite may use this to find a location with accuracy, as inertial sensors often propagate error and there is not the benefit of GPS while in space. Using large high resolution images provided by the Google Mars project, we are using multiple approaches and contrasting them, ideally creating a combined algorithm with the redundancy necessary to accurately pinpoint a location in a variety of scenarios. There is no current computer vision approach to solving the problem of satellite localization, but the methods being used are similar to other image matching approaches.
+<br></br>
+The first approach is using a hough circle detector to find circles in a test image. These circles can then be compared to the circles in the map image to find a section with a similar feature signature to the test image. This is similar to a feature matching algorithm, with a focus on circles as the martian surface is covered in craters which make circle detection a uniquely effective feature detector.
 <h3>Teaser Figure</h3>
 <img src="./images/teaser.jpeg" style="width:600px;height:500px;">
 <!-- Approach -->
@@ -66,7 +68,138 @@ TODO
 Our experiment is to compare a set of images of different sizes and orientations from random locations on the Google Mars ‘visible’ map with the full image. Knowing where the image is on the map, determine how accurately the program was able to locate where the image was at using the error calculation on the x and y location of the predicted location as well as the size and orientation. We will begin by knowing how large the window size is and that the orientation is north south (the same as the google mars source image). Then as we succeed we will make the algorithm more robust by using different orientations and gradually decreasing the window size of input images to prove greater efficacy.
 
 For our success criteria, the program is expected to be slightly less accurate with smaller areas of the map, as there are less features that we can extract to define the image. Initially we will start off by demonstrating a brute-force approach, which will be very computationally expensive and take very long to run as a result. We will then contrast this brute-force approach with the other algorithms/optimizations that we found through our research and compare the computation time as well as accuracy to our other approaches that we present. To actually assess the runtime and accuracy, we plan on using the time library for Python. For computing accuracy, we plan on using several metrics such as SSD and RMSE to compare our approaches.
-<h4> Patrick's Approach </h4>
+<h4>Hough Circle Detection Approach</h4>
+To allow for feature matching the hough circle detector had to be calibrated for the mars images. Using two test images shown below, the sigma for the canny image detector and a range of possible circle sizes was determined. The optimal sigma was found to be 3 for the images we are testing with as it qualitatively displays rough circles which are representative of the actual image’s craters. This, however, may be further altered in the future so that the algorithm weighs which sigma gives the best possible set of edges depending on the quality of the image provided. However, there are limited datasets displaying the entirety of the martian surface so there is only minimal necessity for this algorithm to succeed on other datasets.
+<br></br>
+A range of circles from radius 10 to 90 pixels was found to encompass the majority of distinctive craters in the mars images. The hough circle detector will find only three craters in each image. This is because using three craters, the features found will be unique to the image being scanned. If only two were used, then any two craters could be matched to the image being compared given a rotation and dilation. With three, a unique triangle is made between the circles at each radius. The images below are the circles found at each radius on two test images. These images show that the algorithm is generally able to find three circles of various radii, and because circle detection is performed at 9 different radii the redundancy will allow the comparison between images to be robust so that a unique fingerprint is made of the images being searched for.
+<br></br>
+<h3>Test image 1</h3>
+<img src= "./images/circle/rad10.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad20.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad30.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad40.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad50.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad60.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad70.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad80.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad90.png" style="width:300px;height:300px;">
+<br></br>
+<h3>Test image 2</h3>
+<br></br>
+<img src= "./images/circle/rad210.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad220.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad230.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad240.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad250.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad260.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad270.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad280.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad290.png" style="width:300px;height:300px;">
+<br></br>
+<h3>Test image 3</h3>
+<br></br>
+<img src= "./images/circle/rad310.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad320.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad330.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad340.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad350.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad360.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad370.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad380.png" style="width:300px;height:300px;">
+<br></br>
+<br></br>
+<img src= "./images/circle/rad390.png" style="width:300px;height:300px;">
+<br></br>
+The next step is to perform a calculation of chamfer distance. The locations of the circles’ centers were saved as .npy files, which were then fed into a function to calculate the minimum distance between the three circles in one image to three circles in a second image. This was also performed comparing a single image to itself, where the chamfer distance is expected to be zero, as the images are the same. The results for points in circles of radius 10 are shown in the table below.
+<br></br>
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0lax"></th>
+    <th class="tg-0lax">Image 1</th>
+    <th class="tg-0lax">Image 2</th>
+    <th class="tg-0lax">Image 3</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0lax">Image 1</td>
+    <td class="tg-0lax">0</td>
+    <td class="tg-0lax">154.30152681719923</td>
+    <td class="tg-0lax">205.43739841789466</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Image 2</td>
+    <td class="tg-0lax">154.30152681719923</td>
+    <td class="tg-0lax">0</td>
+    <td class="tg-0lax">173.83933364853746</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Image 3</td>
+    <td class="tg-0lax">205.43739841789466</td>
+    <td class="tg-0lax">173.83933364853746</td>
+    <td class="tg-0lax">0</td>
+  </tr>
+</tbody>
+</table>
+The next step in programming will be to use this algorithm to search a large image for a portion that is identical to a test image which is a cropped version. This will require iterative calculation of the chamfer distance between parts of the large image and the whole test image. The minimum chamfer distance will be determined to be the correct location, thus allowing us to localize a small image on the surface of a larger “map”.
+<br></br>
+
+<h4> Blob Detector + SSD Approach </h4>
 To preprocess the data, the raw images are done in a cylindrical projection, making viewing the entire map difficult:
 <br><br>
 <img src="./images/patrick/projection.png" style="width:300px;height:300px;">
@@ -75,11 +208,11 @@ We first reproject the map, correcting for distortions:
 <br><br>
 <img src="./images/patrick/reproject.png" style="width:300px;height:300px;">
 <br><br>
-We then split up this reprojected image into tiles for ease of processing and crater detection. For example: 
+We then split up this reprojected image into tiles for ease of processing and crater detection. For example:
 <br><br>
 <img src="./images/patrick/tiles.png" style="width:500px;height:250px;">
 <br><br>
-Now, I am using an object detector for each tile, specifically using a blob detector and will extract the SURF descriptors for each region, which I used an already existing implementation. I then use an estimator to determine whether or not the objects detected are craters, specifically using gradient boosted decision tree classifiers from sklearn. Currently I am still working on this, but here is a preliminary prediction: 
+Now, I am using an object detector for each tile, specifically using a blob detector and will extract the SURF descriptors for each region, which I used an already existing implementation. I then use an estimator to determine whether or not the objects detected are craters, specifically using gradient boosted decision tree classifiers from sklearn. Currently I am still working on this, but here is a preliminary prediction:
 <br><br>
 <img src="./images/patrick/predicted_craters.png" style="width:300px;height:300px;">
 <br><br>

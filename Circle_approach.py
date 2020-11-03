@@ -10,7 +10,7 @@ from scipy.spatial import distance
 path = os.getcwd()
 
 assetsdir = path + "/assets/"
-mapname = "thm_dir_N-30_060 copy.png"
+mapname = "thm_dir_N-30_060 copy 3.png"
 testimg = assetsdir+mapname
 testmap= plt.imread(testimg)
 def get_gradients(imggray: np.ndarray):
