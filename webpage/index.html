@@ -48,6 +48,8 @@ Our project aims to identify where an input satellite image was taken relative t
 The problem we are solving is narrowly defined as locating the place where an image was taken from a satellite image of mars. This is applicable to real life space missions where a satellite may use this to find a location with accuracy, as inertial sensors often propagate error and there is not the benefit of GPS while in space. Using large high resolution images provided by the Google Mars project, we are using multiple approaches and contrasting them, ideally creating a combined algorithm with the redundancy necessary to accurately pinpoint a location in a variety of scenarios. There is no current computer vision approach to solving the problem of satellite localization, but the methods being used are similar to other image matching approaches.
 <br></br>
 The first approach is using a hough circle detector to find circles in a test image. These circles can then be compared to the circles in the map image to find a section with a similar feature signature to the test image. This is similar to a feature matching algorithm, with a focus on circles as the martian surface is covered in craters which make circle detection a uniquely effective feature detector.
+<br></br>
+The next approach is using a blob detector along with using SURF (speed up robust features) to perform object detection for the craters. We will then use this in combination with an SSD (single-shot multibox detector) to increase the accuracy of detecting these craters.
 <h3>Teaser Figure</h3>
 <img src="./images/teaser.jpeg" style="width:600px;height:500px;">
 <!-- Approach -->
