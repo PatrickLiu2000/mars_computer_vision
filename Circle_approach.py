@@ -6,13 +6,17 @@ from skimage.feature import canny
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from scipy.spatial import distance
+import glob
 
 path = os.getcwd()
 
 assetsdir = path + "/assets/"
-mapname = "thm_dir_N-30_060 copy 3.png"
-testimg = assetsdir+mapname
-testmap= plt.imread(testimg)
+testbank = path + "/CircleFindAssets/"
+# mapname = "thm_dir_N-30_060 copy 3.png"
+# testimg = assetsdir+mapname
+# testmap= plt.imread(testimg)
+testimages = glob.glob(testbank+"*.png")
+
 def get_gradients(imggray: np.ndarray):
     Mx = np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]])
     My = np.array([[-1, -1, -1], [0, 0, 0], [1, 1, 1]])
@@ -33,16 +37,6 @@ def next_to_black(x, y, imggray):
         return True
     else:
         return False
-# def get_canny(img, sig): #lets you save an edgefile temporarily so canny doesnt have to be run many times
-#     edgefile = "curredge.png"
-#     if not os.path.isfile(path + "/CannyEdges/" + edgefile):
-#         gray = rgb2gray(img)
-#         edges = canny(image=gray, sigma=sig)
-#         plt.imshow(edges)
-#         plt.savefig(path + "/CannyEdges/" + edgefile, dpi = 1200)
-#     else:
-#         edges = plt.imread(path + "/CannyEdges/" + edgefile)
-#     return edges
 def detect_circles(img: np.ndarray, radius:int,use_gradients = True, denoise=False, allow_overlap =False):
     sig = 3  #can be changed based on image, sigma for canny edge detector
     numcircles = 3 #Can be changed to reflect any number of circles
@@ -123,8 +117,6 @@ def detect_circles(img: np.ndarray, radius:int,use_gradients = True, denoise=Fal
 
 
     return centers, H
-
-
 def display(H, centers, img):
     # print("displaying")
 
@@ -142,18 +134,20 @@ def display(H, centers, img):
     axs[0].set_title(msg)
     print("New Figure")
     plt.figure() #should do multiple windows
-
-def main(): # run to find centers of an image and save them
+def getcenters(img): # run to find centers of an image and save them
+    radii = []
     for i in range(1,10):
         rad = i*10
         print("Finding circles radius ", rad)
-        c, h = detect_circles(testmap, rad, use_gradients=False)
-        np.save(path+"/CircleCenters/" + mapname + "_" + str(rad) + ".npy", c) #saves centers as the name of the source underscore the radius.npy
-        display(h, c, testmap)
-    plt.show()
+        c, h = detect_circles(img, rad, use_gradients=False)
+        # np.save(path+"/CircleCenters/" + mapname + "_" + str(rad) + ".npy", c) #saves centers as the name of the source underscore the radius.npy
+        # display(h, c, testmap)
+        radii.append(c)
+    return radii
 
 # c, h = detect_circles(testmap, 60, use_gradients=False)
 # display(h, c, testmap)
+
 
 def chamfer_dist(X, Y):# X is points in map, Y is points in image to be searched for
     dists = []
@@ -176,4 +170,33 @@ def chamfer_dist(X, Y):# X is points in map, Y is points in image to be searched
         cd = cd + i
     cd = float(cd)/len(dists)
     return cd
-# main()
+
+
+def main(query):
+    imagecenters = []
+    j=0
+    for i in testimages:
+        img = plt.imread(i)
+        centers = getcenters(img)
+        imagecenters.append(centers)
+        np.save(path + "/CircleCenters/" + str(j) +  ".npy", centers)
+        j+=1
+        print(imagecenters)
+    q = plt.imread(path+testbank+query)
+    querycenters = getcenters(query)
+    cumulativecds = []
+    for i in range(len(imagecenters)):
+        sum = 0
+        for radius in range(len(imagecenters[i])):
+            cd = chamfer_dist(imagecenters[i][radius], querycenters[radius])
+            sum+=cd
+        cumulativecds.append(sum)
+
+    sortcds = sorted(cumulativecds)
+    mindex = cumulativecds.index(sortcds[0])
+    print("Query image: ", query)
+    print("closest match: ", testimages[mindex])
+    print("chamfer distances: ", cumulativecds)
+
+main("/thm_dir_N-30_060 copy 2.png")
+
