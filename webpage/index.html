@@ -257,49 +257,86 @@ Next steps for my approach include using Keras's implementation of a single-shot
 
 <h4> BRIEF Approach </h4>
 For the BRIEF approach, we used OpenCV to extract key points and descriptors from a plane image of Mars and a local region within the plane image. The key points were detected using STAR, and then we used OpenCV’s BriefDescriptorExtractor to get the descriptors from those key points. The find_and_match_brief method in BRIEF_approach.py uses brute force matching and takes in a number of matches to display in the results – showing all matches by default.
+<br>
+For the final project update, we did more experimentation with the basis of the BRIEF approach completed. First, we compared the BRIEF approach to another feature detector - ORB (Oriented FAST and Rotated BRIEF). In the original update, we saw that matching features within a small region of the Mars surface was highly inaccurate. To compensate for this, we tested two different windows: one that was about half the size of the surface in the image, and one that was about a quarter of the size of the surface in the image. For all the matches showing in the rest of the images, only the best 20 matches computed are showing.
 
-For this mid-project update, the BRIEF method was applied to one image and one local region to test out the method itself. In the final update, the method will be applied to various images with different local regions to test for speed and accuracy. For now, we can see the results of our BRIEF matching method:
-(Images computed with all matches showing)
+<img src="images/brief/im1/brief/top_half_no_smoothing.png">
+<br>
+a)  Original local region (top half of image) and local region with matches showing using BRIEF
 
-<img src="images/brief/all_matches.png">
+<img src="images/brief/im1/brief/top_half_matches_with_plane.png">
 <br>
-a)  Local region within a large photo and its detected key points
-
-<img src="images/brief/all_matches_matched.png">
-<br>
-b)  Local regions key points matched to regions in the plane (hard to see due to size of image)
-
-<img src="images/brief/all_matches_zoom.png">
-<br>
-c)  Zoomed in plane to local area to better see local matches
-<br>
-<br>
-<img src="images/brief/stats_update1.png">
-<br>
-<br>
-d)  Statistics for the BRIEF approach (not including displaying the images, just the calculations themselves for detection and matching)
+b)  Local region matched to plane surface, zoomed in on the location of the local region
 <br><br>
-Using a relatively small window size in comparison to the overall image, 10.27 seconds for computing all the key points and matching them seems to be relatively fast. However, the method so far seems to lack accuracy. Out of 133 matches, there are not many that match to the location of the window I selected in the plane image. I believe this can be explained by 2 factors: the window size and the composition of the Mars surface. BRIEF doesn’t seem to be detecting features close to the edge of the local region, which can be seen in figure A. Any window size smaller actually was unable to detect any features for the image, so it is failing around the edges. For future updates, we will experiment more with larger local regions to see if accuracy is increased in matching. Secondly, the surface of Mars in this image contains many similar features; it is composed mainly of circular craters spread out around the entire surface. This may be the reason that it is detecting many matches outside of the desired region and could be an early indicator that detecting circles with the Hough transform may end up being the most accurate method of detection. In the next update, we will explore with preprocessing images before using the BRIEF approach to see if accuracy is increased. We will also compare the outputs of BRIEF to ORB (Oriented FAST and Rotated BRIEF).
+These two images depict the first local region tested using BRIEF without smoothing. The matches on the local region are all composed of the noise in the image - which we thought would have made this feature matching be wildly inaccurate. However, as we can see in the Figure b, all of the matches actually do fall in the correct region in the plane. Next, we will look at a smaller local region in the same Mars plane and compare results.
+
+<img src="images/brief/im1/brief/bot_left_matches.png">
+<br>
+c)  Original local region (bottom left corner of image) and local region with matches showing using BRIEF
+<br>
+<br>
+<img src="images/brief/im1/brief/bot_left_matches_with_plane.png">
+<br>
+<br>
+d)  Local region matched to plane surface, zoomed in on the location of the local region
+<br><br>
+As we had concluded before, using a smaller local region decreases the accuracy of our feature matching on the Mars surface. There are only a couple matches in this region of the plane (top right area mainly), whereas using half the plane as our window gave us entirely correct matches. This may also be because some of the features weren't on noise, but were on actual craters in the local image. However, we have to consider the real life feasibility of these two windows. If this were an application actually being used on Mars for figuring out where you were located on the planet, and if you already had access to a location in relation to half of the surface, you likely would already know where you were. Thus, we need to find ways to increase accuracy with a smaller selected window. Before we explore that part of the approach, lets compare the statistics of these two different window sizes.
+<br><br>
+<img src="images/brief/im1/brief/top_half_stats.png">
+<br>
+e) Statistics of the half plane window
+<br>
+<br>
+<img src="images/brief/im1/brief/bot_left_stats.png">
+<br>
+f) Statistics of the quarter plane window
+<br><br>
+Interestingly enough, the smaller window actually took more time than the long window to compute and match features. This could be because matching was simpler in the larger window due to all the features being on computed on the noise. Now, we will compare these results to using the ORB approach with the same local regions and plane.
+
+<img src="images/brief/im1/orb/top_orb_local.png">
+<br>
+<img src="images/brief/im1/orb/top_orb_with_plane.png">
+<br>
+g)  Local region (top half of plane) with matches, and local region matched to plane surface, zoomed in on the location of the local region
+<br>
+<img src="images/brief/im1/orb/bot_left_orb_local.png">
+<br>
+<img src="images/brief/im1/orb/bot_left_orb_w_plane.png">
+<br>
+h) Local region (bottom left corner of plane) with matches, and local region matched to plane surface, zoomed in on the location of the local region
 <br><br>
 
-<img src="images/brief/20_matches_local.png">
+Using ORB, the accuracy of the top half of the plane with pretty similar, but the bottom left corner is seeemingly less accurate than when using the BRIEF detector. However, the more interesting part of the results lies in the computed statstics.
+<br><br>
+<img src="images/brief/im1/orb/top_orb_stats.png">
+<br><br>
+i) Statistics of the half plane window (ORB)
+<br><br>
+<img src="images/brief/im1/orb/bot_left_stats.png">
+<br><br>
+j) Statistics of the quarter plane window (ORB)
 <br>
-e)  local area with 20 best matches showing
 <br>
 
-<img src="images/brief/20_matches_zoom.png">
+The ORB detector was far, far faster than the BRIEF detector was (2.3 seconds best compared to 12 seconds). This was likely because there was a smaller number of matches detected with this detector compared to using BRIEF, meaning sorting them and finding the 20 best matches took a lot less time. Although the accuracy decreased slightly from the BRIEF detector, we accept the trade off for a greater increase in speed and seek to increase the accuracy using a different method - smoothing the images first. We will focus on the smaller window since the larger window is not very applicable in a real life setting.
 <br>
-f)  local area matches in plane
+<img src="images/brief/im1/smoothed/smoothing_bot_left_descriptors.png">
+<br>
+<img src="images/brief/im1/smoothed/smoothing_plane.png">
+<br><br>
+<img src="images/brief/im1/smoothed/smoothed_stats.png">
+<br><br>
+k)  Local plane, matches, matched plane, and statistics for preprocessing the images by smoothing them.
 <br><br>
 
-Reiterating what was said before, accuracy seems to be low for these early attempts at using the BRIEF approach. Using different window sizes and preprocessing, we hope to increase the accuracy of this method.
+Comparing the matched plane for the smoothing images and non smoothed image in Figure h, we can see that accuracy has been slightly improved, with more matches in the region depicted in the smoothed plane. Also, speed has again increased according to the statistics for the smoothed feature matching (2.06 seconds compared to 2.3 seconds). Originally, we thought that smoothing would have caused the detection and matching to be slower, as preprocessing an image is an extra step. However, it is likely that this actually causes our detection and matching to be faster as less matches were found, so less had to be sorted. This saves more time than smoothing adds on, since OpenCV's functions are highly optimized. Therefore, we can see that the best results can be obtained from using ORB with preprocessed images.
 
 <br><br>
 <h3> Conclusions and Future Work </h3>
 
 <h4> BRIEF Approach </h4>
 
-As aforementioned, much more experimentation will take place with the basic framework of the BRIEF approach up and working. Different images of the surface of Mars, different local region window sizes, and preprocessing will all be experimented at different levels to attain a most accurate matching of regions to overall surface images of Mars. We will also compute processing times for when changing these parameters to measure for speed as well.
+The direction we went with for the BRIEF approach changed slightly over experimentation, and we discovered that using Oriented FAST and Rotated BRIEF (ORB) detection yielded better results in terms of both accuracy and speed. One step further, preprocessing the images resulted in higher accuracy and even a faster runtime for ORB detection. That being said, there is still room for improvement with the method. Smaller and smaller window sizes yield higher inaccuracies, so more experimentation - possibly with different types of smoothing filters - could take place to improve our results. However, for this type of project specifically, it is likely that BRIEF and ORB aren't the best choices for feature detection and matching. This is because the surface of Mars is composed of many craters, giving the surface a highly repetitive look and causing the detector to not be very accurate overall.
 
 <h4> Blob Detector + SSD Approach </h4>
 Given the predictions that the blob detector has made so far, the accuracies seem promising. Along with using an neural network, this will most likely yield the most accurate result out of all the approaches.
