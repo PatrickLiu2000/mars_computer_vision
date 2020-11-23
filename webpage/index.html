@@ -248,13 +248,21 @@ We then split up this reprojected image into tiles for ease of processing and cr
 <br><br>
 <img src="./images/patrick/tiles.png" style="width:500px;height:250px;">
 <br><br>
-Now, I am using an object detector for each tile, specifically using a blob detector and will extract the SURF descriptors for each region, which I used an already existing implementation. I then use an estimator to determine whether or not the objects detected are craters, specifically using gradient boosted decision tree classifiers from sklearn. Currently I am still working on this, but here is a preliminary prediction:
+Now, I am using an object detector for each tile, specifically using a blob detector and will extract the SURF descriptors and Zernike moments for each region, which I used an already existing implementation. I then use an estimator to determine whether or not the objects detected are craters, specifically using gradient boosted decision tree classifiers from sklearn. 
+<br><br>
+To calculate confidence level, I used Intersection over Union (IoU). Traditionally, the threshold used for if IoU has detected an object is 0.5.
+<br><br>
+<img src="./images/patrick/iou.png" style="width:400px;height:300px;">
+<br><br>
+<b>Model Training</b>
+For the model, I used a Keras implementation of a Single Shot MultiBox Detector (SSD). I mainly chose this because SSD is much easier to train and has comparable accuracy to other models. I did a 0.25 test/train split on the input data. Here is an example of a predicted output (green is correct crater, red is predicted crater).
 <br><br>
 <img src="./images/patrick/predicted_craters.png" style="width:300px;height:300px;">
 <br><br>
-Next steps for my approach include using Keras's implementation of a single-shot multibox detector(SSD).
+For the predictions from the classifiers, to score them, I used the traditional methods of scoring by generating a precision-recall curve, shown here:
 <br><br>
-
+<img src="./images/patrick/precision_recall.png" style="width:400px;height:300px;">
+<br><br>
 <h4> BRIEF Approach </h4>
 For the BRIEF approach, we used OpenCV to extract key points and descriptors from a plane image of Mars and a local region within the plane image. The key points were detected using STAR, and then we used OpenCV’s BriefDescriptorExtractor to get the descriptors from those key points. The find_and_match_brief method in BRIEF_approach.py uses brute force matching and takes in a number of matches to display in the results – showing all matches by default.
 <br>
@@ -339,7 +347,7 @@ Comparing the matched plane for the smoothing images and non smoothed image in F
 The direction we went with for the BRIEF approach changed slightly over experimentation, and we discovered that using Oriented FAST and Rotated BRIEF (ORB) detection yielded better results in terms of both accuracy and speed. One step further, preprocessing the images resulted in higher accuracy and even a faster runtime for ORB detection. That being said, there is still room for improvement with the method. Smaller and smaller window sizes yield higher inaccuracies, so more experimentation - possibly with different types of smoothing filters - could take place to improve our results. However, for this type of project specifically, it is likely that BRIEF and ORB aren't the best choices for feature detection and matching. This is because the surface of Mars is composed of many craters, giving the surface a highly repetitive look and causing the detector to not be very accurate overall.
 
 <h4> Blob Detector + SSD Approach </h4>
-Given the predictions that the blob detector has made so far, the accuracies seem promising. Along with using an neural network, this will most likely yield the most accurate result out of all the approaches.
+Overall, the model's precision and accuracy was not as accurate as I thought, and that was probably in part to not tuning the parameters well enough. Given more time, I believe I could have generated a more accurate model. In terms of other future work, I believe that it would be insightful to explore using other deep learning models such as Faster R-CNN and YOLO to compare their accuracies. Throughout this process, I learned a lot about utilizing computer vision techniques I had learned in class to preprocess image data, and learning/implementing a deep learning model to predict an output to solve an interesting problem.
 
 <h3>Resources</h3>
 <ul>
@@ -356,6 +364,8 @@ Given the predictions that the blob detector has made so far, the accuracies see
   <li> <a href="https://www.sciencedirect.com/science/article/abs/pii/S0032063309000956">Automatic detection of sub-km craters in high resolution planetary images</a> </li>
   <li> <a href="https://docs.opencv.org/master/dc/dc3/tutorial_py_matcher.html">Matching descriptors in OpenCV</a> </li>
   <li> <a href="https://docs.opencv.org/master/dc/d7d/tutorial_py_brief.html">Implementing BRIEF in OpenCV </a> </li>
+  <li> <a href="https://arxiv.org/abs/1512.02325">SSD </a> </li>
+  <li> <a href="https://github.com/pierluigiferrari/ssd_keras/">Keras SSD Implementation </a> </li>
 </ul>
 <br><br>
   <hr>
