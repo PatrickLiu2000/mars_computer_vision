@@ -198,9 +198,43 @@ The next step is to perform a calculation of chamfer distance. The locations of 
   </tr>
 </tbody>
 </table>
-The next step in programming will be to use this algorithm to search a large image for a portion that is identical to a test image which is a cropped version. This will require iterative calculation of the chamfer distance between parts of the large image and the whole test image. The minimum chamfer distance will be determined to be the correct location, thus allowing us to localize a small image on the surface of a larger “map”.
+Finally we applied the distance algorithm to a collection of images from the main map and were able to find which image is a match using the minimum chamfer distance. Ideally We would iterate through the entire image but this approach was found to be computationally intense, so in the interest of time and with a lack of large supercomputers (as would be used in a professional space expedition) the small scale test achieves the same goal of localizing an image using craters as features.
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
+  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-0pky"></th>
+    <th class="tg-0pky">Image 1</th>
+    <th class="tg-0pky">Image 2</th>
+    <th class="tg-0pky">Image 3</th>
+    <th class="tg-0lax">Image 4</th>
+    <th class="tg-0lax">Image 5</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0pky">Test Image</td>
+    <td class="tg-0pky">5</td>
+    <td class="tg-0pky">153</td>
+    <td class="tg-0pky">203</td>
+    <td class="tg-0lax">922</td>
+    <td class="tg-0lax">510</td>
+  </tr>
+</tbody>
+</table>
 <br></br>
-
+The test results above show that this approach is able to successfully identify the location an image is taken from using only 3 circular image features at multiple radii (as it was trying to find image 1 and did so successfully). This result is promising due to the high degree of accuracy, but the concern would be that the computational time required to find the number of craters is too much to be feasible as a quick localization strategy, without the assistance of large computers. However, the intended client being agencies like NASA or companies with large budgets, this is not a primary concern.
+<br></br>
+This approach could also be improved. The goal was set in the beginning to find the height at which an image was taken from the martian surface, but this was proven to be very unreliable. This is because at different heights the crater’s distribution is not unique enough to give an accurate estimate in any way. Also, there are areas of the test images which do not have image data. This was worked around in the code by simply ignoring those sections, but it did result in areas with missing sections matching with the query image when the variable of height was added. As such this approach was quickly abandoned. However, if given more time to adapt the problem we believe it is possible to do height localization by incorporating other methods, perhaps using triangulation of shadows or finding key features like known crater centers and identifying those.
+<br></br>
 <h4> Blob Detector + SSD Approach </h4>
 To preprocess the data, the raw images are done in a cylindrical projection, making viewing the entire map difficult:
 <br><br>
